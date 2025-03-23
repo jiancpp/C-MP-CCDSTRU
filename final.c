@@ -11,12 +11,10 @@
 #define RESET "\033[0m"
 
 typedef int Matrix[4][4][2];
-typedef int WinMatrix[3][4][2];
-
 struct GameVariables {
     int     A[4];
     Matrix  P;
-    WinMatrix  C;
+    Matrix  C;
     bool    B[2];
     int     F[4][4][2];
     Matrix  Uno;
@@ -36,7 +34,8 @@ struct GameVariables {
      {{4, 1}, {4, 2}, {4, 3}, {4, 4}}},
      
      // Initialize C
-     {{{1,1}, {1,2}, {1,3}, {1,4}},    
+     {{{1,1}, {1,2}, {1,3}, {1,4}},
+      {{1,1}, {2,2}, {3,3}, {4,4}},    
       {{1,4}, {2,3}, {3,2}, {4,1}},   
       {{4,1}, {4,2}, {4,3}, {4,4}}},  
 
@@ -156,7 +155,7 @@ isNotOccupied(int pos[2]) {
 int 
 isConditionMet(Matrix player, int condition_idx) {
     int pos[4][2];
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 4; i++) {
         pos[i][0] = game.C[condition_idx][i][0];
         pos[i][1] = game.C[condition_idx][i][1];
     }
@@ -282,7 +281,6 @@ int main() {
             
             // Check Win Condition for Uno
             game.over = (isConditionMet(game.Uno, 0) || 
-                         isConditionMet(game.Uno, 1) ||
                          isConditionMet(game.Uno, 2) ||
                          isConditionMet(game.Uno, 3)) ? 1 : 
                          (NoFreeSpaces()) ? 2 : 0;
@@ -324,7 +322,6 @@ int main() {
 
             // Check Win Condition for Tres
             game.over = (isConditionMet(game.Tres, 0) || 
-                         isConditionMet(game.Tres, 1) ||
                          isConditionMet(game.Tres, 2) ||
                          isConditionMet(game.Tres, 3)) ? 3 : 
                          (NoFreeSpaces()) ? 2 : 0;
