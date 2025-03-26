@@ -22,7 +22,7 @@ struct GameVariables {
     Matrix  Tres;
     bool    turn;
     bool    go;
-    int     over;
+    bool    over;
 } game = {
     // Initialize A[];
     {1, 2, 3, 4}, 
@@ -57,7 +57,7 @@ struct GameVariables {
     // Initialize boolean var
     true,
     false,
-    0        
+    false        
 };
 
 //********************FUNCTIONS*********************//
@@ -124,21 +124,6 @@ DisplayBoard(int visible) {
         pos[0]++;
     }
     printf("  +-----+-----+-----+-----+\n");
-}
-
-void
-DisplayFreeSpaces()
-{
-    printf("\n\n");
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            printf("| ");
-            for (int k = 0; k < 2; k++){
-                printf("%d ", game.F[i][j][k]);
-            }
-        }
-        printf("|\n");
-    }
 }
 
 int
@@ -228,9 +213,27 @@ NextPlayerMove(int pos[2]) {
     }
 }
 
+/*
+    This function executes the requirement for the System State "GameOver". It displays the result 
+    of the game once conditions are met
+*/
 bool 
-GameOver(int over) {
-    switch (over) {
+GameOver(bool over) {
+    int result;
+
+    if (over && NoFreeSpaces()) {
+        result = 2;
+    }
+    else if (over && isConditionMet(game.Uno, 0) || isConditionMet(game.Uno, 1) ||
+                     isConditionMet(game.Uno, 2) || isConditionMet(game.Uno, 3)) {
+        result = 1;
+    }
+    else if (over && isConditionMet(game.Tres, 0) || isConditionMet(game.Tres, 1) ||
+                     isConditionMet(game.Tres, 2) || isConditionMet(game.Tres, 3)) {
+        result = 3;
+    }
+
+    switch (result) {
     case 1:
         DisplayBoard(1);
         printf("%sPlayer Uno%s wins!", PINK, RESET);
@@ -271,7 +274,8 @@ int main() {
         if (game.turn && !game.go && !game.over) {
             printf("%s", buffer);
             DisplayBoard(1);
-            // DisplayFreeSpaces();
+
+            // Prompt user for position they wish to occupy
             printf("%sPlayer Uno%s, which space do you wish to occupy (row column) . . . \n", PINK, RESET);
             printf("%s(Input format: row <space> column)%s\n", YELLOW, RESET);
             do {
@@ -280,17 +284,21 @@ int main() {
             NextPlayerMove(pos);
             
             // Check Win Condition for Uno
+            // over if and only if (Uno ∈ W ∨ Tres ∈ W ∨ F = ∅)
             game.over = (isConditionMet(game.Uno, 0) || 
+                         isConditionMet(game.Uno, 1) ||
                          isConditionMet(game.Uno, 2) ||
-                         isConditionMet(game.Uno, 3)) ? 1 : 
-                         (NoFreeSpaces()) ? 2 : 0;
+                         isConditionMet(game.Uno, 3)) ||
+                         (NoFreeSpaces()) ? true : false;
             system("cls");
         }
         // PLAYER DOS
         if (!game.turn && !game.over) {
+            // Check Player Mode [2p / 3p]
             if (players == 3) {
                 DisplayBoard(0);
 
+                // Prompt user for a currently occupied position they wish to delete
                 printf("%sPlayer Dos%s, which space do you wish to delete (row column) . . . \n", RED, RESET);
                 printf("%s(Input format: row <space> column)%s\n", YELLOW, RESET);
                 do {
@@ -299,6 +307,7 @@ int main() {
                 NextPlayerMove(pos);
                 system("cls");
             } else {
+                // Randomize position that will be deleted
                 do {
                     pos[0] = (rand() % 4) + 1;
                     pos[1] = (rand() % 4) + 1;
@@ -312,7 +321,8 @@ int main() {
         if (game.go && !game.over) {
             printf("%s", buffer);
             DisplayBoard(1);
-            // DisplayFreeSpaces();
+
+            // Prompt user for position they wish to occupy
             printf("%sPlayer Tres%s, which space do you wish to occupy (row column) . . . \n", BLUE, RESET);
             printf("%s(Input format: row <space> column)%s\n", YELLOW, RESET);
             do {
@@ -322,9 +332,10 @@ int main() {
 
             // Check Win Condition for Tres
             game.over = (isConditionMet(game.Tres, 0) || 
+                         isConditionMet(game.Tres, 1) ||
                          isConditionMet(game.Tres, 2) ||
-                         isConditionMet(game.Tres, 3)) ? 3 : 
-                         (NoFreeSpaces()) ? 2 : 0;
+                         isConditionMet(game.Tres, 3)) || 
+                         (NoFreeSpaces()) ? true : false;
 
             system("cls");
         }
