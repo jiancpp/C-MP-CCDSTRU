@@ -491,7 +491,7 @@ NextPlayerMove(int pos[2]) {
 */
 bool
 GameOver(bool over) {
-    int result; //stores the player number winning
+    int result; //stores the number of the winning player
     /*
         CHECK IF THE BOARD IS FULL (Player Dos Wins)
         - If `over` is true AND there are no free spaces left (`NoFreeSpaces()` returns true),
@@ -501,7 +501,6 @@ GameOver(bool over) {
     if (over && NoFreeSpaces()) {
         result = 2;
     }
-
 
     /*
         CHECK IF PLAYER UNO WINS
@@ -514,7 +513,6 @@ GameOver(bool over) {
                       isConditionMet(game.Uno, 3))) {
         result = 1;
     }
-
 
     /*
         CHECK IF PLAYER TRES WINS
@@ -562,6 +560,7 @@ int main() {
     int players = 0;
     int pos[2] = {1, 1};
     int start = 0;
+    int error_check;
     char buffer[50] = "";
     char enter[2];
     UpdateFreeSpaces();
@@ -603,19 +602,25 @@ int main() {
             printf("%s", buffer);
             DisplayBoard(1);
 
-
             // Prompt user for position they wish to occupy
-            printf("%sPlayer Uno%s, which space do you wish to occupy (row column) . . . \n", PINK, RESET);
-            printf("%s(Input format: row <space> column)%s\n", YELLOW, RESET);
+            printf("%sPlayer Uno%s, which space do you wish to occupy . . . \n", PINK, RESET);
             do {
-                scanf("%d %d", &pos[0], &pos[1]);
-            } while (pos[0] > 4 || pos[0] < 1 || pos[1] > 4 || pos[1] < 1 || !isNotOccupied(pos));
+                do {
+                    printf("Enter row number: ");
+                    scanf(" %d", &pos[0]);
+                } while (pos[0] > 4 || pos[0] < 1 );
+                
+                do {
+                    printf("Enter column number: ");
+                    scanf(" %d", &pos[1]);
+                } while (pos[1] > 4 || pos[1] < 1);
+                
+            } while (!isNotOccupied(pos));
             NextPlayerMove(pos);
            
             // Check Win Condition for Uno
             // over if and only if (Uno ∈ W ∨ Tres ∈ W ∨ F = ∅)
             game.over = (isConditionMet(game.Uno, 0) ||
-                         isConditionMet(game.Uno, 1) ||
                          isConditionMet(game.Uno, 2) ||
                          isConditionMet(game.Uno, 3)) ||
                          (NoFreeSpaces()) ? true : false;
@@ -632,8 +637,17 @@ int main() {
                 printf("%sPlayer Dos%s, which space do you wish to delete (row column) . . . \n", RED, RESET);
                 printf("%s(Input format: row <space> column)%s\n", YELLOW, RESET);
                 do {
-                    scanf("%d %d", &pos[0], &pos[1]);
-                } while (pos[0] > 4 || pos[0] < 1 || pos[1] > 4 || pos[1] < 1 || isNotOccupied(pos));  // is Dos required to delete?
+                    do {
+                        printf("Enter row number: ");
+                        scanf(" %d", &pos[0]);
+                    } while (pos[0] > 4 || pos[0] < 1 );
+                    
+                    do {
+                        printf("Enter column number: ");
+                        scanf(" %d", &pos[1]);
+                    } while (pos[1] > 4 || pos[1] < 1);
+
+                } while (isNotOccupied(pos));  // is Dos required to delete?
                 NextPlayerMove(pos);
                 system("cls");
             } else {
@@ -655,17 +669,24 @@ int main() {
 
 
             // Prompt user for position they wish to occupy
-            printf("%sPlayer Tres%s, which space do you wish to occupy (row column) . . . \n", BLUE, RESET);
-            printf("%s(Input format: row <space> column)%s\n", YELLOW, RESET);
+            printf("%sPlayer Tres%s, which space do you wish to occupy . . . \n", BLUE, RESET);
             do {
-                scanf(" %d %d", &pos[0], &pos[1]);
-            } while (pos[0] > 4 || pos[0] < 1 || pos[1] > 4 || pos[1] < 1 || !isNotOccupied(pos));
+                do {
+                    printf("Enter row number: ");
+                    scanf(" %d", &pos[0]);
+                } while (pos[0] > 4 || pos[0] < 1 );
+                
+                do {
+                    printf("Enter column number: ");
+                    scanf(" %d", &pos[1]);
+                } while (pos[1] > 4 || pos[1] < 1);
+
+            } while (!isNotOccupied(pos));
             NextPlayerMove(pos);
 
 
             // Check Win Condition for Tres
             game.over = (isConditionMet(game.Tres, 0) ||
-                         isConditionMet(game.Tres, 1) ||
                          isConditionMet(game.Tres, 2) ||
                          isConditionMet(game.Tres, 3)) ||
                          (NoFreeSpaces()) ? true : false;
