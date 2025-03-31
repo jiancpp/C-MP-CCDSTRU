@@ -8,7 +8,7 @@
 #define PINK "\033[1;35m" // UNO
 #define RED "\033[1;31m" // DOS
 #define BLUE "\033[1;34m" // TRES
-#define YELLOW "\033[1;33m"
+#define YELLOW "\033[38;2;255;255;153m"
 #define RESET "\033[0m"
 
 
@@ -69,12 +69,132 @@ struct GameVariables {
     false        
 };
 
+char uno_symbol = '1';
+char tres_symbol = '3';
 
-//********************FUNCTIONS*********************//
-
+//******************** GAME INTERFACE *********************//
 
 /*
-    Function: CheckPlayerHand
+    Function: printDivider()
+    -----------------------------
+    - Displays a 120 character long divider
+*/
+void
+printDivider() {
+    for (int i = 0; i < 120; i++) {
+        printf("=");
+    }
+    printf("\n");
+}
+
+/*
+    Function: printHeader()
+    -----------------------------
+    - Displays the game title
+*/
+void
+printHeader() {
+    printDivider();
+    printf("\n%76s", "Under the Shadow: Mafia Edition\n\n");
+    printDivider();
+}
+
+/*
+    Function: gameInstructions()
+    -----------------------------
+    - Introduces the game variables and objectives
+    - Displays the winning patterns
+*/
+void
+gameInstructions() {
+    system("cls");
+    printDivider();
+    printf("\n%s%69s%s", YELLOW, "GAME INSTRUCTIONS\n\n", RESET);
+    printDivider();
+
+    printf("\n\n");
+    printf("%104s", "\"Under The Shadow: Mafia Edition\" is a board game that requires high-level thinking\n");
+    printf("%106s", "where players play as either Uno and Tres, two lovers-turned-enemies who are fugitives\n");
+    printf("%105s", "on the run from Detective Dos. The two players plant misleading evidences pointing to\n");
+    printf("%106s", "the other by occupying the spaces on the board. The first player to complete one of the\n");
+    printf("%106s", "winning patterns wins and successfully escapes from suspicion, leaving the other taking\n");
+    printf("%74s", "the fall for their crime.\n\n");
+
+    printDivider();
+    printf("\n\n%sPLAYERS MODES:%s     (1) Two-Player-Mode   (2) Three-Player-Mode\n", YELLOW, RESET);
+
+    printf("\n%sPLAYERS:%s\n", YELLOW, RESET);
+    printf("%sUno%s & %sTres%s         their objective is to be the first to complete a winning pattern.\n", PINK, RESET, BLUE, RESET);
+
+    printf("\n%sSPECIAL PLAYER:%s\n", YELLOW, RESET);
+    printf("%sDos%s                their objective is to capture both Uno and Tres. They needs to strategically\n", RED, RESET); 
+    printf("                   pick a position on the board that is currently occupied by any of the players,\n"); 
+    printf("                   removing it from the board and stopping both players from winning. Dos wins \n");
+    printf("                   if the game is a draw.\n\n");
+
+    printf("\n%sWINNING PATTERNS:%s\n", YELLOW, RESET);
+    // First row of patterns (Top row win, Bottom row win, Correct diagonal win)
+    printf("                   +-----+-----+-----+-----+    +-----+-----+-----+-----+    +-----+-----+-----+-----+\n");
+    printf("                   |  %sO%s  |  %sO%s  |  %sO%s  |  %sO%s  |    |     |     |     |     |    |     |     |     |  %sO%s  |\n",
+           YELLOW, RESET, YELLOW, RESET, YELLOW, RESET, YELLOW, RESET, YELLOW, RESET);
+    printf("                   +-----+-----+-----+-----+    +-----+-----+-----+-----+    +-----+-----+-----+-----+\n");
+    printf("                   |     |     |     |     |    |     |     |     |     |    |     |     |  %sO%s  |     |\n",
+           YELLOW, RESET);
+    printf("                   +-----+-----+-----+-----+    +-----+-----+-----+-----+    +-----+-----+-----+-----+\n");
+    printf("                   |     |     |     |     |    |     |     |     |     |    |     |  %sO%s  |     |     |\n",
+           YELLOW, RESET);
+    printf("                   +-----+-----+-----+-----+    +-----+-----+-----+-----+    +-----+-----+-----+-----+\n");
+    printf("                   |     |     |     |     |    |  %sO%s  |  %sO%s  |  %sO%s  |  %sO%s  |    |  %sO%s  |     |     |     |\n",
+           YELLOW, RESET, YELLOW, RESET, YELLOW, RESET, YELLOW, RESET, YELLOW, RESET);
+    printf("                   +-----+-----+-----+-----+    +-----+-----+-----+-----+    +-----+-----+-----+-----+\n");
+
+
+}
+
+/*
+    Function: setCharacter()
+    -----------------------------
+    - Allows players to customize symbols for Uno and Tres
+*/
+void
+setCharacter() {
+    system("cls");
+    printHeader();
+
+    int willCustomize;
+
+    printf("\n\n%69s", "CURRENT SYMBOLS\n");
+    printf("\n%51s", " ");
+    printf("Uno: %s%c%s\t", PINK, uno_symbol, RESET);
+    printf("Tres: %s%c%s\n\n", BLUE, tres_symbol, RESET);
+
+    printDivider();
+    printf("\n%76s\n", "Customize [1]  Keep Current [2]");
+    printf("\n%69s", "Select option > ");
+    scanf(" %d", &willCustomize);
+
+    printf("\n\n");
+
+    switch (willCustomize) {
+    case 1:
+        printf("%72s", "Change Symbol for Uno: ");
+        scanf(" %c", &uno_symbol);
+        printf("\n\n");
+        printf("%72s", "Change Symbol for Tres: ");
+        scanf(" %c", &tres_symbol);
+        break;
+    
+    default:
+        break;
+    }
+    printf("\n\n");
+}
+
+//******************** GAME FUNCTIONS *********************//
+
+/*
+    Function: CheckPlayerHand()
+    -----------------------------------
     - Checks if a given position (`pos[2]`) exists in the player's 4x4 matrix.
     - Used to determine if a player occupies a specific spot.
 
@@ -112,6 +232,7 @@ CheckPlayerHand (int pos[2], Matrix player) {
 
 /*
     Function: UpdateFreeSpaces
+    -----------------------------------
     - Updates the `game.F` matrix to track available spaces on the board.
     - If a position is occupied by Player Uno or Player Tres, it marks it as unavailable (0).
     - If a position is unoccupied, it retains its original coordinates from `game.P`.
@@ -139,6 +260,7 @@ UpdateFreeSpaces() {
 
 /*
     Function: DisplayBoard
+    -----------------------------------
     - Prints the current state of the game board.
     - Displays row and column numbers for reference.
     - Shows Player Uno’s moves in pink and Player Tres’s moves in blue.
@@ -158,14 +280,15 @@ DisplayBoard(int visible) {
         printf("  +-----+-----+-----+-----+\n");    // Print horizontal line separator
         printf("%d ", i + 1);                       // Print row number
         for (int j = 0; j < 4; j++) {               // Loop through each column of the board
-            printf("| ");
+            printf("|");
             if (game.F[i][j][0] == 0) {
                 int uno_hand = CheckPlayerHand(pos, game.Uno);                  // If the space is occupied (game.F[i][j][0] == 0), check player hands
                 int tres_hand = CheckPlayerHand(pos, game.Tres);                
                 char *color = (uno_hand && visible) ? PINK : (tres_hand && visible) ? BLUE : RESET; // Pink for Player Uno, Blue for Player Tres
-                printf("%s%d %d %s", color, pos[0], pos[1], RESET);
+                char symbol = (uno_hand && visible) ? uno_symbol : (tres_hand && visible) ? tres_symbol : '0'; // Pink for Player Uno, Blue for Player Tres
+                printf("%s  %c  %s", color, symbol, RESET);
             } else {
-                printf("    ");    // Print empty space if position is unoccupied
+                printf("     ");    // Print empty space if position is unoccupied
             }
             pos[1]++; // Move to the next column
         }
@@ -178,6 +301,7 @@ DisplayBoard(int visible) {
 
 /*
     Function: isNotOccupied
+    -----------------------------------
     - Checks if a given position on the board is **free** (not occupied by any player).
    
     Parameters:
@@ -202,8 +326,9 @@ isNotOccupied(int pos[2]) {
 
 /*
     Function: isConditionMet
-    - Checks if a player has met a **winning condition** by occupying a specific set of 4 positions.
+    -----------------------------------
 
+    - Checks if a player has met a **winning condition** by occupying a specific set of 4 positions.
 
     Parameters:
     - Matrix player: The player's matrix (Uno, Tres, etc.).
@@ -257,19 +382,19 @@ NoFreeSpaces() {
 
 // ******************** REQUIRED FUNCTIONS ******************** //
 
+/*
+    Function: NextPlayerMove
+    -------------------------
 
-// Function: NextPlayerMove
-// Handles the movement logic for Player Uno and Player Tres.
-// Determines the next move based on whose turn it is.
+    Handles the movement logic for Player Uno and Player Tres.
+    Determines the next move based on whose turn it is.
+*/
 void
 NextPlayerMove(int pos[2]) {
     srand(time(NULL));
     int x, y;
     x = pos[0]; // Extract X coordinate from position
     y = pos[1]; // Extract Y coordinate from position
-
-
-
 
     /*
         PLAYER UNO'S TURN (First Move)
@@ -288,14 +413,14 @@ NextPlayerMove(int pos[2]) {
         game.F[x - 1][y - 1][1] = 0;
 
 
-        game.go = false; // Indication that Player Uno has moved
-        game.turn = false;
+        game.go = !game.go;     // Indication that Player Uno has moved (game.go == false) 
+        game.turn = !game.turn; // Indication that Dos is next to move (game.turn == false) 
     }
 
 
     /*
         PLAYER DOS'S TURN (Remove Opponent's Piece)
-        - Executes only if it's not Uno's turn (`game.turn == false`)
+        - Executes only after Uno's turn (`game.turn == false`)
         - Ensures the chosen position IS occupied (`isNotOccupied(pos) == false`)
         - Checks if the position belongs to Player Uno or Player Tres
         - If Player Uno occupies the position, remove their piece
@@ -322,7 +447,7 @@ NextPlayerMove(int pos[2]) {
             game.F[x - 1][y - 1][0] = x; // Mark the space as free again
             game.F[x - 1][y - 1][1] = y;
         }        
-        game.turn = false; // Indication that Player Dos has moved
+        game.turn = !game.turn; // Indication that Player Dos has moved
     }
 
 
@@ -343,7 +468,7 @@ NextPlayerMove(int pos[2]) {
         game.F[x - 1][y - 1][1] = 0;
 
 
-        game.go = true; // Indication that Player Tres has moved
+        game.go = !game.go; // Indication that Player Tres has moved
     }
 }
 
@@ -384,8 +509,9 @@ GameOver(bool over) {
           Player Uno (PINK) is declared the winner.
         - `isConditionMet(game.Uno, i)` checks for a specific winning condition.
     */
-    else if ((over && isConditionMet(game.Uno, 0)) || isConditionMet(game.Uno, 1) ||
-                     isConditionMet(game.Uno, 2) || isConditionMet(game.Uno, 3)) {
+    else if (over && (isConditionMet(game.Uno, 0) ||
+                      isConditionMet(game.Uno, 2) || 
+                      isConditionMet(game.Uno, 3))) {
         result = 1;
     }
 
@@ -395,12 +521,18 @@ GameOver(bool over) {
         - If `over` is true AND Player Tres has met one of four possible win conditions,
           Player Tres (BLUE) is declared the winner.
     */
-    else if ((over && isConditionMet(game.Tres, 0)) || isConditionMet(game.Tres, 1) ||
-                     isConditionMet(game.Tres, 2) || isConditionMet(game.Tres, 3)) {
+    else if (over && (isConditionMet(game.Tres, 0) || 
+                      isConditionMet(game.Tres, 2) || 
+                      isConditionMet(game.Tres, 3))) {
         result = 3;
     }
 
 
+    /*
+        DISPLAY GAME RESULT
+        - If result is either 1, 2, 3, the game ends (GameOver() == true)
+        - Otherwise, the game continues (GameOver() == false)
+    */
     switch (result) {
     case 1: //Player Uno Wins
         DisplayBoard(1);
@@ -424,20 +556,44 @@ GameOver(bool over) {
 }
 
 
-
-
-
-
 int main() {
     //INITIALIZE GAME
     srand(time(NULL));
     int players = 0;
     int pos[2] = {1, 1};
+    int start = 0;
     char buffer[50] = "";
+    char enter[2];
     UpdateFreeSpaces();
 
+    // Welcome Screen for Players
+    system("cls");
+    while (start != 3) {
+        printHeader();
+        printf("\n\n");
+        printf("%93s", "[1] Game Instructions   [2] Customize Character  [3]  Start Game\n\n");
+        printf("%69s", "Select option > ");
+        scanf(" %d", &start);
 
-    printf("How many players? [2p / 3p]: ");
+        switch (start) {
+        case 1:
+            gameInstructions();
+            printf("\n%74s", "Press [Enter] to continue...");
+            getch();
+            break;
+        case 2:
+            setCharacter();
+            printf("\n%74s", "Press [Enter] to continue...");
+            getch();
+            break;
+        default:
+            break;
+        }
+        system("cls");
+    }
+
+    printHeader();
+    printf("\n\n%75s", "How many players? [2p / 3p]: ");
     scanf(" %d", &players);
     system("cls");
    
